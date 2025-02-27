@@ -17,11 +17,11 @@ class Advertiser:
         tracking_url_template: Tracking URL template for this advertiser
     """
 
-id: str
-name: str
-description: str
-website: str
-commission_rate: float
-category: str
-is_active: bool = True
-tracking_url_template: Optional[str] = None
+    id: str
+    name: str
+    description: str
+    website: str
+    commission_rate: float
+    category: str
+    is_active: bool = True
+    tracking_url_template: Optional[str] = None
