@@ -13,7 +13,7 @@ def test_load_sample_data(advertiser_service):
     assert len(advertiser_service.advertisers) > 0
 
 def get_all_advertisers(advertiser_service):
-
+    """Checks that data has been loaded into the service."""
     advertisers = advertiser_service.get_all_advertisers("some_publisher_id")
 
     assert len(advertisers) == 2
