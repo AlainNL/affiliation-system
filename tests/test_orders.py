@@ -1,7 +1,5 @@
 import pytest
-import uuid
 from datetime import datetime, timedelta
-from app.models import Order, OrderStatus
 from app.services.order_service import OrderService
 from app.services.application_service import ApplicationService
 from unittest.mock import MagicMock
@@ -65,8 +63,8 @@ def test_track_order_success(order_service, mock_application_service):
     """
     advertiser_id = "new_advertiser"
     publisher_id = "new_publisher"
-    user_id = "user789"
-    amount = 99.99
+    user_id = "user1"
+    amount = 50.00
     tracking_params = {"source": "website"}
 
     mock_application_service.check_publisher_access.return_value = True
@@ -86,7 +84,7 @@ def test_track_order_fail_due_to_access(order_service, mock_application_service)
     """
     advertiser_id = "restricted_advertiser"
     publisher_id = "restricted_publisher"
-    user_id = "user000"
+    user_id = "user1"
     amount = 50.00
 
     mock_application_service.check_publisher_access.return_value = False

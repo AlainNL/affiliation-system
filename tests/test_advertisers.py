@@ -1,4 +1,3 @@
-import uuid
 import pytest
 from app.services.advertiser_service import AdvertiserService
 from app.models import Advertiser
