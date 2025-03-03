@@ -27,9 +27,9 @@ class OrderService:
         sample_orders = [
             Order(
                 id=str(uuid.uuid4()),
-                advertiser_id="sample_advertiser_1",
-                publisher_id="sample_publisher_1",
-                user_id="user123",
+                advertiser_id="1",
+                publisher_id="1",
+                user_id="user1",
                 amount=129.99,
                 commission=6.50,
                 status=OrderStatus.CONFIRMED,
@@ -39,9 +39,9 @@ class OrderService:
             ),
             Order(
                 id=str(uuid.uuid4()),
-                advertiser_id="sample_advertiser_2",
-                publisher_id="sample_publisher_1",
-                user_id="user456",
+                advertiser_id="2",
+                publisher_id="2",
+                user_id="2",
                 amount=49.99,
                 commission=2.50,
                 status=OrderStatus.PENDING,

@@ -71,7 +71,7 @@ class ApplicationService:
         return True, "Successful application", application
 
 
-    def get_publisher_applciation(self, publisher_id: str) ->  List[Application]:
+    def get_publisher_application(self, publisher_id: str) ->  List[Application]:
         """
         Retrieves all applications from a publisher.
 
@@ -86,6 +86,7 @@ class ApplicationService:
 
         return [self.applications[application_id]
                 for application_id in self.publisher_applications[publisher_id].values()]
+
 
     def get_application(self, application_id: str) -> Optional[Application]:
         """
@@ -121,6 +122,7 @@ class ApplicationService:
         application = self.applications[application_id]
 
         return application.status == ApplicationStatus.APPROVED
+
 
     def auto_approve_application(self, application_id: str) -> Tuple[bool, str]:
         """

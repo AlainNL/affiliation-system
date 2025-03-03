@@ -1,4 +1,5 @@
 from flask import Flask
+from app.api import register_blueprints
 
 def create_app(config=None):
 
@@ -11,6 +12,8 @@ def create_app(config=None):
 
     if config:
         app.config.update(config)
+
+        register_blueprints(app)
 
 
     return app

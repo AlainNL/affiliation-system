@@ -62,7 +62,7 @@ def test_get_publisher_application(application_service):
 
     application_service.publisher_applications[publisher_id] = {advertiser_id: application_id}
 
-    applications = application_service.get_publisher_applciation(publisher_id)
+    applications = application_service.get_publisher_application(publisher_id)
 
     assert len(applications) == 1
     assert applications[0].publisher_id == publisher_id
