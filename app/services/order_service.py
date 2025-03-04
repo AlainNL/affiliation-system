@@ -41,7 +41,7 @@ class OrderService:
                 id=str(uuid.uuid4()),
                 advertiser_id="2",
                 publisher_id="2",
-                user_id="2",
+                user_id="user2",
                 amount=49.99,
                 commission=2.50,
                 status=OrderStatus.PENDING,

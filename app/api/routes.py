@@ -4,11 +4,12 @@ from app.api.serializers import (api_response, serialize_advertiser,
                                 serialize_application, serialize_order)
 from app.services import AdvertiserService, ApplicationService, OrderService
 
-api_blueprint = Blueprint('api_membership', __name__, url_prefix='/api_membership/v1')
+api_blueprint = Blueprint('api_membership', __name__, url_prefix='/api_membership/')
 
 advertiser_service = AdvertiserService()
 application_service = ApplicationService(advertiser_service)
 order_service = OrderService(application_service)
+
 
 @api_blueprint.route('/advertisers', methods=['GET'])
 def get_advertisers():
@@ -132,6 +133,7 @@ def approve_application(application_id):
     return api_response(
         message=message
     )
+
 
 @api_blueprint.route("/orders", methods=['GET'])
 def get_orders():
