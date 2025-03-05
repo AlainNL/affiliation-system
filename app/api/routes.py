@@ -10,7 +10,7 @@ advertiser_service = AdvertiserService()
 application_service = ApplicationService(advertiser_service)
 order_service = OrderService(application_service)
 
-
+# Récupérer les informations d’un annonceur
 @api_blueprint.route('/advertisers', methods=['GET'])
 def get_advertisers():
     """Retrieves the list of advertisers available to a publisher."""
@@ -29,9 +29,10 @@ def get_advertisers():
         message=f"{len(serialized_advertisers)} advertisers found"
     )
 
+# Récupérer les détails d’un annonceur
 @api_blueprint.route('/advertisers/<string:advertiser_id>', methods=['GET'])
 def get_details_advertiser(advertiser_id):
-    """Retrieves the details of an advertiser"""
+    """Retrieves the details of an advertiser."""
     advertiser = advertiser_service.get_advertiser(advertiser_id)
     if not advertiser:
         return api_response(
@@ -44,100 +45,43 @@ def get_details_advertiser(advertiser_id):
         message="Found advertiser"
     )
 
-@api_blueprint.route('/advertisers/<string:advertiser_id>/tracking-url', methods=['GET'])
-def get_tracking_url(advertiser_id):
-    """Generates a tracking URL for an advertiser."""
-    publisher_id = request.args.get('publisher_id')
-    user_id = request.args.get('user_id')
+# Candidater à un annonceur
+@api_blueprint.route('/applications', methods=['POST'])
+def apply_to_advertiser():
+    """Allows a publisher to apply to an advertiser."""
+    publisher_id = request.json.get('publisher_id')
+    advertiser_id = request.json.get('advertiser_id')
 
-    if not publisher_id or not user_id:
+    if not publisher_id or not advertiser_id:
         return api_response(
-            message='Login of advertiser & publisher required',
+            message="Publisher and advertiser IDs are required",
             success=False,
             status_code=400
         )
 
-    if not application_service.check_publisher_access(publisher_id, advertiser_id):
-        return api_response(
-            message="Access to this advertiser is denied",
-            success=False,
-            status_code=403
-        )
+    # Appel de la méthode apply_to_advertiser
+    success, message, application = application_service.apply_to_advertiser(publisher_id, advertiser_id)
 
-    custom_params = {key: value for key, value in request.args.items() if key not in ['publisher_id', 'user_id']}
-
-    tracking_url = advertiser_service.get_advertiser_tracking_url(
-        advertiser_id, publisher_id, user_id, custom_params
-    )
-
-    if not tracking_url:
-        return api_response(
-            message="Unable to generate tracking URL",
-            success=False,
-            status_code=400
-        )
-
-    return api_response(
-        data={"tracking_url": tracking_url},
-        message='Tracking URL generated successfully'
-    )
-
-@api_blueprint.route('/applications', methods=['GET'])
-def get_applications():
-    """Retrieves applications for a publisher"""
-    publisher_id = request.args.get('publisher_id')
-    if not publisher_id:
-        return api_response(
-            message="Publisher login required",
-            success=False,
-            status_code=400
-        )
-
-    applications = application_service.get_publisher_application(publisher_id)
-    serialized_applications = [serialize_application(app) for app in applications]
-
-    return api_response(
-        data=serialized_applications,
-        message=f"{len(serialized_applications)} applications found"
-    )
-
-
-@api_blueprint.route('/applications/<string:application_id>', methods=['GET'])
-def get_application(application_id):
-    """Retrieves the details of an application"""
-    application = application_service.get_application(application_id)
-    if not application:
-        return api_response(
-            message="Application not found",
-            success=False,
-            status_code=404
-        )
-
-    return api_response(
-        data=serialize_application(application),
-        message="Application found"
-    )
-
-@api_blueprint.route('/applications/<string:application_id>/approve', methods=['POST'])
-def approve_application(application_id):
-    """Automatically approve applications"""
-    success, message = application_service.auto_approve_application(application_id)
-
+    # Retour de la réponse en fonction du résultat
     if not success:
         return api_response(
             message=message,
-            success=False,
+            success=success,
             status_code=400
         )
 
+    # Si l'application est réussie, vous pouvez retourner les informations de l'application
     return api_response(
-        message=message
+        message=message,
+        success=success,
+        data={'application_id': application.id, 'advertiser_id': application.advertiser_id},
+        status_code=201
     )
 
-
-@api_blueprint.route("/orders", methods=['GET'])
+# Récupérer les commandes attribuées à un éditeur
+@api_blueprint.route('/orders', methods=['GET'])
 def get_orders():
-    """Retrieves the orders of a publisher with optional filter"""
+    """Retrieves the orders of a publisher with optional filter."""
     publisher_id = request.args.get('publisher_id')
     if not publisher_id:
         return api_response(
@@ -180,9 +124,10 @@ def get_orders():
         message=f"{len(serialized_orders)} orders found"
     )
 
+# Simuler une commande (suivi)
 @api_blueprint.route('/orders/track', methods=['POST'])
 def track_order():
-    """Simulates an order"""
+    """Simulates an order."""
     data = request.json
     if not data:
         return api_response(

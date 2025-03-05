@@ -1,4 +1,3 @@
-import uuid
 from typing import Dict, List, Optional
 
 from app.models import Advertiser
@@ -18,7 +17,7 @@ class AdvertiserService:
         """Loading data"""
         sample_advertisers = [
             Advertiser(
-                id=str(uuid.uuid4()),
+                id="user_1",
                 name="E-Shop Fashion",
                 description="Boutique en ligne de vêtements et accessoires",
                 website="https://eshopfashion.example",
@@ -27,7 +26,7 @@ class AdvertiserService:
                 tracking_url_template="https://tracking.example.com/eshopfashion?pid={publisher_id}&uid={user_id}"
             ),
             Advertiser(
-                id=str(uuid.uuid4()),
+                id="user_2",
                 name="TechGadgets",
                 description="Produits high-tech et gadgets",
                 website="https://techgadgets.example",
@@ -36,7 +35,7 @@ class AdvertiserService:
                 tracking_url_template="https://tracking.example.com/techgadgets?pid={publisher_id}&uid={user_id}"
             ),
             Advertiser(
-                id=str(uuid.uuid4()),
+                id="user_3",
                 name="SportsOutlet",
                 description="Articles de sport à prix réduits",
                 website="https://sportsoutlet.example",
@@ -89,7 +88,7 @@ class AdvertiserService:
             The generated tracking URL or None if the advertiser doesn't exist
         """
         advertiser = self.get_advertiser(advertiser_id)
-        print(f"DEBUG: Retrieved advertiser for ID '{advertiser_id}': {advertiser}")
+
         if not advertiser or not advertiser.tracking_url_template:
             return None
 

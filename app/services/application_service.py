@@ -21,6 +21,37 @@ class ApplicationService:
         self.applications: Dict[str, Application] = {}
         self.publisher_applications: Dict[str, Dict[str, str]] = {}
 
+        self._load_sample_data()
+
+    def _load_sample_data(self):
+        """
+        Loading data for the applications.
+        """
+        sample_applications = [
+            Application(
+                id=str(uuid.uuid4()),
+                publisher_id="publisher_1",
+                advertiser_id="user_1",
+                status=ApplicationStatus.APPROVED,
+                application_date=datetime.now()
+            ),
+            Application(
+                id=str(uuid.uuid4()),
+                publisher_id="publisher_2",
+                advertiser_id="user_2",
+                status=ApplicationStatus.APPROVED,
+                application_date=datetime.now()
+            )
+        ]
+
+        for app in sample_applications:
+            self.applications[app.id] = app
+
+            if app.publisher_id not in self.publisher_applications:
+                self.publisher_applications[app.publisher_id] = {}
+
+            self.publisher_applications[app.publisher_id][app.advertiser_id] = app.id
+
 
     def apply_to_advertiser(self, publisher_id: str, advertiser_id: str,
                             notes: Optional[str] = None) -> Tuple[bool, str, Optional[Application]]:
@@ -88,19 +119,6 @@ class ApplicationService:
                 for application_id in self.publisher_applications[publisher_id].values()]
 
 
-    def get_application(self, application_id: str) -> Optional[Application]:
-        """
-        Retrieves an application by its identifier.
-
-        Args:
-            application_id: Application identifier
-
-        Returns:
-            The corresponding application, or None if it doesn't exist.
-        """
-        return self.applications.get(application_id)
-
-
     def check_publisher_access(self, publisher_id: str, advertiser_id: str) -> bool:
         """
         Checks if a publisher has access to an advertiser (approved application).
@@ -124,23 +142,14 @@ class ApplicationService:
         return application.status == ApplicationStatus.APPROVED
 
 
-    def auto_approve_application(self, application_id: str) -> Tuple[bool, str]:
+    def get_application(self, application_id: str) -> Optional[Application]:
         """
-        Automatically approves an application (for tests).
+        Retrieves an application by his identifier.
 
         Args:
             application_id: Application identifier
 
         Returns:
-            Tuple containing:
-            - A Boolean indicating whether the application has been approved
-            - An explanatory message
+            The corresponding application, or None if it doesn't exist.
         """
-        application = self.get_application(application_id)
-        if not application:
-            return False, "Application not found"
-
-        application.status = ApplicationStatus.APPROVED
-        application.response_date = datetime.now()
-
-        return True, "Successfully approved application"
+        return self.applications.get(application_id)
