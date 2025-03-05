@@ -1,4 +1,6 @@
 from flask import Flask
+from app.api import register_blueprints
+from app.utils.error_handlers import register_error_handlers
 
 def create_app(config=None):
 
@@ -11,6 +13,10 @@ def create_app(config=None):
 
     if config:
         app.config.update(config)
+
+    register_blueprints(app)
+
+    register_error_handlers(app)
 
 
     return app

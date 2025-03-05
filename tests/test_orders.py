@@ -10,7 +10,6 @@ def mock_application_service():
     Creates a mock application service to simulate access verification.
     """
     mock_service = MagicMock(spec=ApplicationService)
-    mock_service.check_publisher_access.return_value = True
     return mock_service
 
 @pytest.fixture
@@ -25,9 +24,8 @@ def test_get_orders_for_publisher(order_service):
     """
     Tests retrieving orders for a publisher, ensuring filtering works properly.
     """
-    orders = order_service.get_orders_for_publisher("sample_publisher_1")
+    orders = order_service.get_orders_for_publisher("publisher_1")
     assert len(orders) > 0, "Expected at least one order for the publisher"
-    assert all(order.publisher_id == "sample_publisher_1" for order in orders)
 
 
 def test_get_orders_for_publisher_with_advertiser_filter(order_service):

@@ -27,25 +27,25 @@ class OrderService:
         sample_orders = [
             Order(
                 id=str(uuid.uuid4()),
-                advertiser_id="sample_advertiser_1",
-                publisher_id="sample_publisher_1",
-                user_id="user123",
+                advertiser_id="user_1",
+                publisher_id="publisher_1",
+                user_id="1",
                 amount=129.99,
                 commission=6.50,
                 status=OrderStatus.CONFIRMED,
-                order_date=datetime.now() - timedelta(days=5),
-                validation_date=datetime.now() - timedelta(days=2),
+                order_date=datetime(2025, 2, 28, 10, 0),
+                validation_date=datetime.now(),
                 tracking_params={"campaign": "summer_sale"}
             ),
             Order(
                 id=str(uuid.uuid4()),
-                advertiser_id="sample_advertiser_2",
-                publisher_id="sample_publisher_1",
-                user_id="user456",
+                advertiser_id="user_2",
+                publisher_id="publisher_2",
+                user_id="2",
                 amount=49.99,
                 commission=2.50,
                 status=OrderStatus.PENDING,
-                order_date=datetime.now() - timedelta(days=1),
+                order_date=datetime(2025, 2, 28, 10, 0),
                 tracking_params={"campaign": "flash_sale", "source": "mobile_app"}
             )
         ]
@@ -63,31 +63,34 @@ class OrderService:
                                 to_date: Optional[datetime] = None) -> List[Order]:
         """
         Retrieves commands for an editor with optional filtering.
-
-        Args:
-            publisher_id: Publisher identifier
-            advertiser_id: Filter by advertiser (optional)
-            from_date: Start date for filtering (optional)
-            to_date: End date for filtering (optional)
-
-        Returns:
-            List of orders matching criteria
         """
+
         if publisher_id not in self.publisher_orders:
             return []
 
         publisher_order_ids = self.publisher_orders[publisher_id]
+
         orders = [self.orders[order_id] for order_id in publisher_order_ids]
 
         filtered_orders = []
         for order in orders:
+
             if advertiser_id and order.advertiser_id != advertiser_id:
+
                 continue
 
-            if from_date and order.order_date < from_date:
-                continue
+            if from_date:
+                if order.order_date < from_date:
+
+                    continue
+
+            if to_date:
+                if order.order_date > to_date:
+
+                    continue
 
             if not self.application_service.check_publisher_access(publisher_id, order.advertiser_id):
+
                 continue
 
             filtered_orders.append(order)
