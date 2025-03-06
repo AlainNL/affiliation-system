@@ -34,9 +34,6 @@ def parse_date(date_str, date_name="Date"):
 async def get_advertisers():
     """Retrieves the list of advertisers available to a publisher asynchronously."""
     publisher_id = request.args.get('publisher_id')
-    if not publisher_id:
-        return handle_missing_param("Publisher login")
-
 
     advertisers = await asyncio.to_thread(advertiser_service.get_all_advertisers, publisher_id)
     serialized_advertisers = [serialize_advertiser(adv) for adv in advertisers]
