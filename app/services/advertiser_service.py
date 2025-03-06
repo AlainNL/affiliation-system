@@ -59,7 +59,7 @@ class AdvertiserService:
             self.advertisers[advertiser.id] = advertiser
 
 
-    def get_all_advertisers(self, publisher_id: Optional[str] = None) -> Iterable[Advertiser]:
+    def get_all_advertisers(self, publisher_id: Optional[str] = None) -> List[Advertiser]:
         """
         Returns a generator to retrieve advertisers one by one.
 
@@ -67,9 +67,9 @@ class AdvertiserService:
             An iterable of advertisers.
         """
         if publisher_id:
-            yield from (adv for adv in self.advertisers.values() if adv.publisher_id == publisher_id)
+            return [adv for adv in self.advertisers.values() if getattr(adv, 'publisher_id', None) == publisher_id]
         else:
-            yield from self.advertisers.values()
+            return list(self.advertisers.values())
 
     def get_advertiser(self, advertiser_id: str) -> Optional[Advertiser]:
         """

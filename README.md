@@ -12,11 +12,11 @@ This API allows an affiliate partner to manage relationships between advertisers
   - [Orders](#orders)
 - [Data Models](#data-models)
 - [Tests](#tests)
-- [Passage à l'échelle](#passage-à-léchelle)
+- [Scalability](#Scalability])
 
 ## Installation
 
-### Prerequiites
+### Prerequites
 
 - Python 3.9+
 - pip
@@ -79,104 +79,81 @@ pytest
 
 The API is organized around three main resources:
 
-### Advertisers
+## API Endpoints
 
-#### Retrieves all advertisers
+### 1. Advertisers
+#### Retrieve the list of advertisers
+- **GET** `/api_membership/advertisers`
+- **Description**: Retrieves the list of advertisers available to a publisher.
+- **Optional Parameter**:
+  - `publisher_id` (query param) - Publisher's identifier.
 
-```
-GET /api_membership/advertisers
-```
+#### Retrieve advertiser details
+- **GET** `/api_membership/advertisers/<advertiser_id>`
+📝 *Replace `<advertiser_id>` with the actual advertiser's ID. Example: `user_1`, `user_2`, `user_3`.*
+- **Description**: Retrieves details of a specific advertiser.
+- **Parameter**:
+  - `advertiser_id` (URL param) - Advertiser's identifier.
 
-Retrieves the list of advertisers available to a publisher.
+---
 
-#### Récupérer un annonceur
+### 2. Applications
+#### Apply to an advertiser
+- **POST** `/api_membership/applications`
+- **Description**: Allows a publisher to apply to an advertiser.
+- **Required JSON Body**:
+  ```json
+  {
+    "publisher_id": "publisher_1",
+    "advertiser_id": "user_1"
+  }
 
-```
-GET /api_membership/advertisers/<advertiser_id>
-```
+### 3. Orders
 
-Retrieves details of a specific advertiser.
+#### Retrieve orders
+- **Method:** `GET`
+- **Endpoint:** `/api_membership/orders?publisher_id=<publisher_id>`
+📝 *Replace `<publisher_id>` with the actual publisher's ID. Example: `publisher_1`, `publisher_2`.*
+- **Description:** Retrieves a publisher's orders with optional filters.
 
+**Required Parameters:**
+| Parameter      | Type   | Description               |
+|---------------|--------|---------------------------|
+| `publisher_id` | string | Publisher's identifier   |
 
-### Applications
+**Optional Parameters:**
+| Parameter    | Type   | Description                |
+|-------------|--------|----------------------------|
+| `advertiser_id` | string | Filter by advertiser   |
+| `from_date` | string (ISO 8601) | Start date |
+| `to_date`   | string (ISO 8601) | End date   |
 
-#### Create an application
+---
 
-```
-POST /api/v1/applications
-```
+#### Track an order
+- **Method:** `POST`
+- **Endpoint:** `/api_membership/orders/track`
+- **Description:** Simulates an order and records the data.
 
-Crée une candidature pour un annonceur.
-
-Corps de la requête:
+**Request Body (JSON):**
 ```json
 {
-  "publisher_id": "publisher_1",
-  "advertiser_id": "user_2"
+  "advertiser_id": "user_2",
+  "publisher_id": "publisher_2",
+  "user_id": "2",
+  "amount": 49.99,
+  "tracking_params": {
+    "campaign": "flash_sale",
+    "source": "mobile_app"
+  }
 }
-```
 
-#### Récupérer les candidatures d'un éditeur
-
-```
-GET /api/v1/applications?publisher_id={publisher_id}
-```
-
-Récupère la liste des candidatures d'un éditeur.
-
-#### Récupérer une candidature
-
-```
-GET /api/v1/applications/{application_id}
-```
-
-Récupère les détails d'une candidature spécifique.
-
-
-### Commandes
-
-#### Récupérer les commandes d'un éditeur
-
-```
-GET /api/v1/orders?publisher_id={publisher_id}
-```
-
-Récupère la liste des commandes d'un éditeur. Des paramètres de filtrage peuvent être ajoutés:
-- `advertiser_id`: Filtrer par annonceur
-- `from_date`: Date de début (format ISO 8601)
-- `to_date`: Date de fin (format ISO 8601)
-
-#### Récupérer une commande
-
-```
-GET /api/v1/orders/{order_id}
-```
-
-Récupère les détails d'une commande spécifique.
-
-#### Simuler une commande (pour les tests)
-
-```
-POST /api/v1/orders/track
-```
-
-Simule le tracking d'une commande (fonctionnalité de test).
-
-Corps de la requête:
-```json
-{
-  "advertiser_id": "user_1",
-  "publisher_id": "publisher_1",
-  "user_id": "1",
-  "amount": 129.99,
-  "tracking_params": {"campaign": "summer_sale"}
-}
 
 ```
 
 ## Modèles de données
 
-### Annonceur (Advertiser)
+### Advertiser
 
 ```json
 {
@@ -184,13 +161,13 @@ Corps de la requête:
   "name": "string",
   "description": "string",
   "website": "string",
-  "commission_rate": "number",
+  "commission_rate": "float",
   "category": "string",
   "is_active": "boolean"
 }
 ```
 
-### Candidature (Application)
+### Application
 
 ```json
 {
@@ -199,3 +176,109 @@ Corps de la requête:
   "publisher_id": "string",
   "status": "string (pending, approved, rejected)",
   "application_date": "string (ISO 8601)",
+}
+```
+
+### Orders
+
+```json
+{
+  "id": "string",
+  "advertiser_id": "string",
+  "publisher_id": "string",
+  "user_id": "string",
+  "amount": "float",
+  "commission": "float",
+  "status": "string (pending, approved, rejected)",
+  "order_date": "string (ISO 8601)",
+  "validation_date": "string (ISO 8601)",
+  "tracking_params": {
+    "campaign": "string",
+    "source": "string (optional)"
+  }
+}
+
+```
+
+## Tests
+
+### Running Tests
+
+To run the tests, execute the following command:
+
+```bash
+pytest
+```
+We use `pytest` as our testing framework. It supports fixtures, assertions, and various plugins to extend functionality, making it easier to write and manage tests.
+
+### Advertiser Tests
+
+- Test: Get All Advertisers
+Ensures that the get_all_advertisers method correctly returns a list of advertisers.
+```python
+def test_get_all_advertisers(test_advertiser_service):
+    advertisers = list(test_advertiser_service.get_all_advertisers("some_publisher_id"))
+    assert len(advertisers) == 3
+```
+
+- Test: Generate Tracking URL
+Ensures that a tracking URL is generated correctly for an advertiser.
+```python
+def test_get_advertiser_tracking_url(test_advertiser_service):
+    tracking_url = test_advertiser_service.get_advertiser_tracking_url(advertiser.id, publisher_id, user_id)
+    assert tracking_url is not None
+```
+
+
+### API Endpoints tests
+
+- Test: Get Advertisers
+Tests the GET /api_membership/advertisers endpoint, checking the response status and data.
+``` python
+def test_get_advertisers(client):
+   response = client.get('/api_membership/advertisers')
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert len(data['data']) > 0
+    advertiser_id = data['data'][0]['id']
+    assert advertiser_id is not None, "Advertiser ID is None"
+```
+
+- Test: Get Specific Advertiser
+Tests the GET /api_membership/advertisers/<advertiser_id> endpoint to retrieve a specific advertiser.
+```python
+def test_get_advertiser(client):
+    response = client.get(f'/api_membership/advertisers/{advertiser_id}')
+    assert response.status_code == 200
+```
+
+- Test: Apply to Advertiser via API
+Tests the POST /api_membership/applications endpoint to apply to an advertiser.
+```python
+def test_apply_to_advertiser(client):
+    response = client.get('/api_membership/advertisers')
+    data = json.loads(response.data)
+    advertiser_id = data['data'][0]['id']
+
+
+    publisher_id = "test_publisher"
+    response = client.post('/api_membership/applications',
+                        json={"publisher_id": publisher_id, "advertiser_id": advertiser_id})
+
+
+    data = json.loads(response.data)
+    assert response.status_code == 201
+    assert data['success'] is True
+    assert "application_id" in data['data']
+    assert data['data']["advertiser_id"] == advertiser_id
+```
+
+- Test: Get Orders
+Tests the GET /api_membership/orders endpoint to retrieve the list of orders for a publisher.
+```python
+def test_get_orders(client):
+    response = client.get('/api_membership/orders?publisher_id=test_publisher')
+    assert response.status_code == 200
+````
+
+## Tests

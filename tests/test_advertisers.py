@@ -12,7 +12,7 @@ def test_load_sample_data(test_advertiser_service):
 
 def test_get_all_advertisers(test_advertiser_service):
     """Checks that data has been loaded into the service."""
-    advertisers = list(test_advertiser_service.get_all_advertisers("some_publisher_id"))
+    advertisers = list(test_advertiser_service.get_all_advertisers())
 
     assert len(advertisers) == 3
     assert advertisers[0].name == "E-Shop Fashion"
@@ -24,10 +24,11 @@ def test_get_advertiser_tracking_url(test_advertiser_service):
     user_id = "1"
     custom_params = {"campaign": "summer_sale", "source": "newsletter"}
 
-    advertisers = list(test_advertiser_service.get_all_advertisers(publisher_id))
+    advertisers = list(test_advertiser_service.get_all_advertisers())
 
-    # Test for an existing advertiser
-    advertiser = advertisers[0]  # E-Shop Fashion
+    assert len(advertisers) > 0, "Aucun annonceur trouvé."
+    advertiser = advertisers[0]
+
     tracking_url = test_advertiser_service.get_advertiser_tracking_url(
         advertiser.id, publisher_id, user_id, custom_params=custom_params
     )
@@ -43,7 +44,7 @@ def test_get_advertiser_tracking_url_for_nonexistent_advertiser(test_advertiser_
     publisher_id = "publisher_1"
     user_id = "1"
 
-    # Test with a non-existent advertiser ID
+
     tracking_url = test_advertiser_service.get_advertiser_tracking_url(
         "nonexistent-id", publisher_id, user_id
     )

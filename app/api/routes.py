@@ -32,10 +32,11 @@ def parse_date(date_str, date_name="Date"):
 
 @api_blueprint.route('/advertisers', methods=['GET'])
 async def get_advertisers():
-    """Retrieves the list of advertisers available to a publisher asynchronously."""
+    """Retrieves the list of advertisers available to a publisher"""
     publisher_id = request.args.get('publisher_id')
 
     advertisers = await asyncio.to_thread(advertiser_service.get_all_advertisers, publisher_id)
+
     serialized_advertisers = [serialize_advertiser(adv) for adv in advertisers]
 
     return api_response(
@@ -43,10 +44,9 @@ async def get_advertisers():
         message=f"{len(serialized_advertisers)} advertisers found"
     )
 
-
 @api_blueprint.route('/advertisers/<string:advertiser_id>', methods=['GET'])
 async def get_details_advertiser(advertiser_id):
-    """Retrieves the details of an advertiser asynchronously."""
+    """Retrieves the details of an advertiser"""
 
     advertiser = await asyncio.to_thread(advertiser_service.get_advertiser, advertiser_id)
     if not advertiser:
@@ -63,7 +63,7 @@ async def get_details_advertiser(advertiser_id):
 
 @api_blueprint.route('/applications', methods=['POST'])
 async def apply_to_advertiser():
-    """Allows a publisher to apply to an advertiser asynchronously."""
+    """Allows a publisher to apply to an advertiser."""
     publisher_id = request.json.get('publisher_id')
     advertiser_id = request.json.get('advertiser_id')
 
