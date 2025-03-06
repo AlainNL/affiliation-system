@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional
 from app.models import Order, OrderStatus
 from app.services.application_service import ApplicationService
@@ -23,7 +23,7 @@ class OrderService:
         self._load_sample_data()
 
     def _load_sample_data(self):
-
+        """Load sample orders for testing."""
         sample_orders = [
             Order(
                 id=str(uuid.uuid4()),
@@ -49,54 +49,42 @@ class OrderService:
                 tracking_params={"campaign": "flash_sale", "source": "mobile_app"}
             )
         ]
-
         for order in sample_orders:
             self.orders[order.id] = order
+            self.publisher_orders.setdefault(order.publisher_id, []).append(order.id)
 
-            if order.publisher_id not in self.publisher_orders:
-                self.publisher_orders[order.publisher_id] = []
-
-            self.publisher_orders[order.publisher_id].append(order.id)
+    def _filter_orders(self, orders: List[Order], advertiser_id: Optional[str], from_date: Optional[datetime],
+                        to_date: Optional[datetime]) -> List[Order]:
+        """Filter orders based on provided filters."""
+        filtered_orders = []
+        for order in orders:
+            if advertiser_id and order.advertiser_id != advertiser_id:
+                continue
+            if from_date and order.order_date < from_date:
+                continue
+            if to_date and order.order_date > to_date:
+                continue
+            filtered_orders.append(order)
+        return filtered_orders
 
     def get_orders_for_publisher(self, publisher_id: str, advertiser_id: Optional[str] = None,
-                                from_date: Optional[datetime] = None,
-                                to_date: Optional[datetime] = None) -> List[Order]:
+                                from_date: Optional[datetime] = None, to_date: Optional[datetime] = None) -> List[Order]:
         """
-        Retrieves commands for an editor with optional filtering.
-        """
+        Retrieves orders for a publisher with optional filtering.
 
+        This method uses a generator to efficiently handle large datasets.
+        """
         if publisher_id not in self.publisher_orders:
             return []
 
         publisher_order_ids = self.publisher_orders[publisher_id]
+        orders = (self.orders[order_id] for order_id in publisher_order_ids)
+        filtered_orders = self._filter_orders(list(orders), advertiser_id, from_date, to_date)
 
-        orders = [self.orders[order_id] for order_id in publisher_order_ids]
-
-        filtered_orders = []
-        for order in orders:
-
-            if advertiser_id and order.advertiser_id != advertiser_id:
-
-                continue
-
-            if from_date:
-                if order.order_date < from_date:
-
-                    continue
-
-            if to_date:
-                if order.order_date > to_date:
-
-                    continue
-
-            if not self.application_service.check_publisher_access(publisher_id, order.advertiser_id):
-
-                continue
-
-            filtered_orders.append(order)
-
-        return filtered_orders
-
+        return [
+            order for order in filtered_orders
+            if self.application_service.check_publisher_access(publisher_id, order.advertiser_id)
+        ]
 
     def get_order(self, order_id: str) -> Optional[Order]:
         """
@@ -110,9 +98,11 @@ class OrderService:
         """
         return self.orders.get(order_id)
 
-    def track_order(self, advertiser_id: str, publisher_id: str, user_id: str,
-                    amount: float, tracking_params: Optional[Dict[str, str]] = None) -> Optional[Order]:
+    def track_order(self, advertiser_id: str, publisher_id: str, user_id: str, amount: float,
+                    tracking_params: Optional[Dict[str, str]] = None) -> Optional[Order]:
         """
+        Create and track a new order, ensuring the publisher has access to the advertiser.
+
         Args:
             advertiser_id: Advertiser identifier
             publisher_id: Publisher identifier
@@ -127,7 +117,6 @@ class OrderService:
             return None
 
         commission = amount * 0.05
-
         order_id = str(uuid.uuid4())
         order = Order(
             id=order_id,
@@ -136,13 +125,10 @@ class OrderService:
             user_id=user_id,
             amount=amount,
             commission=commission,
-            tracking_params=tracking_params
+            tracking_params=tracking_params or {}
         )
 
         self.orders[order_id] = order
-
-        if publisher_id not in self.publisher_orders:
-            self.publisher_orders[publisher_id] = []
-        self.publisher_orders[publisher_id].append(order_id)
+        self.publisher_orders.setdefault(publisher_id, []).append(order_id)
 
         return order

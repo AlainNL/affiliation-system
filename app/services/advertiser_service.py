@@ -1,4 +1,5 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Iterable
+from functools import wraps
 
 from app.models import Advertiser
 
@@ -7,6 +8,15 @@ class AdvertiserService:
     Advertiser management service.
     In a real application, this service would interact with a database.
     """
+
+    def check_advertiser_exists(method):
+        """Decorator to check if an advertiser exists before executing the method."""
+        @wraps(method)
+        def wrapper(self, advertiser_id: str, *args, **kwargs):
+            if advertiser_id not in self.advertisers:
+                return None
+            return method(self, advertiser_id, *args, **kwargs)
+        return wrapper
 
     def __init__(self):
         """Initialize service"""
@@ -49,17 +59,14 @@ class AdvertiserService:
             self.advertisers[advertiser.id] = advertiser
 
 
-    def get_all_advertisers(self, publisher_id: str) -> List[Advertiser]:
+    def get_all_advertisers(self, publisher_id: str) -> Iterable[Advertiser]:
         """
-        Retrieves all available advertisers for a publisher.
-
-        Args:
-            publisher_id: Publisher ID
+        Returns a generator to retrieve advertisers one by one.
 
         Returns:
-            List of available advertisers
+            An iterable of advertisers.
         """
-        return list(self.advertisers.values())
+        yield from self.advertisers.values()
 
     def get_advertiser(self, advertiser_id: str) -> Optional[Advertiser]:
         """
@@ -73,6 +80,7 @@ class AdvertiserService:
         """
         return self.advertisers.get(advertiser_id)
 
+    @check_advertiser_exists
     def get_advertiser_tracking_url(self, advertiser_id: str, publisher_id: str, user_id: str,
                                     custom_params: Optional[Dict[str, str]] = None) -> Optional[str]:
         """
@@ -87,22 +95,11 @@ class AdvertiserService:
         Returns:
             The generated tracking URL or None if the advertiser doesn't exist
         """
-        advertiser = self.get_advertiser(advertiser_id)
-
-        if not advertiser or not advertiser.tracking_url_template:
-            return None
-
-        #Generate URL
-        tracking_url = advertiser.tracking_url_template.format(
-            publisher_id=publisher_id,
-            user_id=user_id
-        )
+        advertiser = self.advertisers[advertiser_id]
+        tracking_url = advertiser.tracking_url_template.format(publisher_id=publisher_id, user_id=user_id)
 
         if custom_params:
-            param_str = "&".join([f"{key}={value}" for key, value in custom_params.items()])
-            if "?" in tracking_url:
-                tracking_url += "&" + param_str
-            else:
-                tracking_url += "?" + param_str
+            param_str = "&".join(f"{key}={value}" for key, value in custom_params.items())
+            tracking_url += "&" + param_str if "?" in tracking_url else "?" + param_str
 
         return tracking_url

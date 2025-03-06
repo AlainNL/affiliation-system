@@ -85,9 +85,9 @@ def api_response(data: Union[Dict, List, None] = None, message: str = "",
     Returns:
         Tuple with response JSON + status code
     """
-    respone ={
+    response ={
         "success": success,
         "message": message,
         "data": data
     }
-    return jsonify(respone),status_code
+    return jsonify(response),status_code
