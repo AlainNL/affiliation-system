@@ -19,7 +19,7 @@ This API allows an affiliate partner to manage relationships between advertisers
 
 - Python 3.9+
 - pip
-- Docker et Docker Compose (optionnel)
+- Docker & Docker Compose (optionnel)
 
 ### Local Installation
 
@@ -47,7 +47,7 @@ cp .env.
 
 ### Installation with Docker
 
-1. Cloner le dépôt
+1. Clone the deposit
 ```bash
 git clone https://github.com/AlainNL/affiliation-system.git
 cd affiliation-api
