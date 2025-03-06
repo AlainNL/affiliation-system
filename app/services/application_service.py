@@ -1,155 +1,77 @@
 import uuid
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
+from collections import defaultdict
 
 from app.models import Application, ApplicationStatus
 from app.services import AdvertiserService
+
+"""Decorator for validate an Advertiser"""
+def validate_advertiser(func):
+    def wrapper(self, publisher_id, advertiser_id, *args, **kwargs):
+        if not self.advertiser_service.get_advertiser(advertiser_id):
+            return False, "Advertiser doesn't exist", None
+        return func(self, publisher_id, advertiser_id, *args, **kwargs)
+    return wrapper
 
 class ApplicationService:
     """
     Service to manage applications for advertisers.
     """
-
     def __init__(self, advertiser_service: AdvertiserService):
-        """
-        Initialize service.
-
-        Args:
-            advertiser_service: Service for accessing advertiser data
-        """
         self.advertiser_service = advertiser_service
         self.applications: Dict[str, Application] = {}
-        self.publisher_applications: Dict[str, Dict[str, str]] = {}
-
+        self.publisher_applications: Dict[str, Dict[str, str]] = defaultdict(dict)
         self._load_sample_data()
 
     def _load_sample_data(self):
-        """
-        Loading data for the applications.
-        """
-        sample_applications = [
-            Application(
+        """Load sample applications."""
+        for publisher_id, advertiser_id in [("publisher_1", "user_1"), ("publisher_2", "user_2")]:
+            app = Application(
                 id=str(uuid.uuid4()),
-                publisher_id="publisher_1",
-                advertiser_id="user_1",
-                status=ApplicationStatus.APPROVED,
-                application_date=datetime.now()
-            ),
-            Application(
-                id=str(uuid.uuid4()),
-                publisher_id="publisher_2",
-                advertiser_id="user_2",
+                publisher_id=publisher_id,
+                advertiser_id=advertiser_id,
                 status=ApplicationStatus.APPROVED,
                 application_date=datetime.now()
             )
-        ]
+            self._store_application(app)
 
-        for app in sample_applications:
-            self.applications[app.id] = app
+    def _store_application(self, application: Application):
+        """Stores an application in memory."""
+        self.applications[application.id] = application
+        self.publisher_applications[application.publisher_id][application.advertiser_id] = application.id
 
-            if app.publisher_id not in self.publisher_applications:
-                self.publisher_applications[app.publisher_id] = {}
+    @validate_advertiser
+    def apply_to_advertiser(self, publisher_id: str, advertiser_id: str, notes: Optional[str] = None) -> Tuple[bool, str, Optional[Application]]:
+        """Creates an application for an advertiser."""
+        existing_app_id = self.publisher_applications[publisher_id].get(advertiser_id)
+        if existing_app_id:
+            existing_app = self.applications[existing_app_id]
+            messages = {
+                ApplicationStatus.APPROVED: "You are already affiliated with this advertiser",
+                ApplicationStatus.PENDING: "Your application is already awaiting validation"
+            }
+            return False, messages.get(existing_app.status, "Application already exists"), existing_app
 
-            self.publisher_applications[app.publisher_id][app.advertiser_id] = app.id
-
-
-    def apply_to_advertiser(self, publisher_id: str, advertiser_id: str,
-                            notes: Optional[str] = None) -> Tuple[bool, str, Optional[Application]]:
-        """
-        Creates an application for an advertiser.
-
-        Args:
-            publisher_id: Publisher identifier
-            advertiser_id: Advertiser identifier
-            notes: Notes justifying the application
-
-        Returns:
-            Tuple containing:
-            - A Boolean indicating whether the application has been created
-            - An explanatory message
-            - The Application object created or None
-        """
-
-        advertiser = self.advertiser_service.get_advertiser(advertiser_id)
-        if not advertiser:
-            return False, "advertiser doesn't exist", None
-
-        if publisher_id in self.publisher_applications:
-            if advertiser_id in self.publisher_applications[publisher_id]:
-                application_id = self.publisher_applications[publisher_id][advertiser_id]
-                application = self.applications[application_id]
-
-                if application.status == ApplicationStatus.APPROVED:
-                    return False, "You are already affiliated with this advertiser", application
-
-                if application.status == ApplicationStatus.PENDING:
-                    return False, "Your application is already awaiting validation", application
-
-        application_id = str(uuid.uuid4())
-        application = Application(
-            id=application_id,
+        new_app = Application(
+            id=str(uuid.uuid4()),
             advertiser_id=advertiser_id,
             publisher_id=publisher_id,
             notes=notes
         )
+        self._store_application(new_app)
+        return True, "Successful application", new_app
 
-        self.applications[application_id] = application
-
-        if publisher_id not in self.publisher_applications:
-            self.publisher_applications[publisher_id] = {}
-        self.publisher_applications[publisher_id][advertiser_id] = application_id
-
-        return True, "Successful application", application
-
-
-    def get_publisher_application(self, publisher_id: str) ->  List[Application]:
-        """
-        Retrieves all applications from a publisher.
-
-        Args:
-            publisher_id: Publisher ID
-
-        Returns:
-            List of publisher applications
-        """
-        if publisher_id not in self.publisher_applications:
-            return []
-
-        return [self.applications[application_id]
-                for application_id in self.publisher_applications[publisher_id].values()]
-
+    def get_publisher_application(self, publisher_id: str):
+        """Retrieves all applications from a publisher lazily (generator for large volume)."""
+        for app_id in self.publisher_applications.get(publisher_id, {}).values():
+            yield self.applications[app_id]
 
     def check_publisher_access(self, publisher_id: str, advertiser_id: str) -> bool:
-        """
-        Checks if a publisher has access to an advertiser (approved application).
-
-        Args:
-            publisher_id: Publisher identifier
-            advertiser_id: Advertiser ID
-
-        Returns:
-            True if publisher has an approved application, False otherwise
-        """
-        if publisher_id not in self.publisher_applications:
-            return False
-
-        if advertiser_id not in self.publisher_applications[publisher_id]:
-            return False
-
-        application_id = self.publisher_applications[publisher_id][advertiser_id]
-        application = self.applications[application_id]
-
-        return application.status == ApplicationStatus.APPROVED
-
+        """Checks if a publisher has access to an advertiser (approved application)."""
+        app_id = self.publisher_applications[publisher_id].get(advertiser_id)
+        return bool(app_id and self.applications[app_id].status == ApplicationStatus.APPROVED)
 
     def get_application(self, application_id: str) -> Optional[Application]:
-        """
-        Retrieves an application by his identifier.
-
-        Args:
-            application_id: Application identifier
-
-        Returns:
-            The corresponding application, or None if it doesn't exist.
-        """
+        """Retrieves an application by its identifier."""
         return self.applications.get(application_id)

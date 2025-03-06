@@ -43,7 +43,7 @@ def test_apply_to_advertiser_advertiser_not_found(application_service, advertise
     success, message, application = application_service.apply_to_advertiser(publisher_id, advertiser_id)
 
     assert not success
-    assert message == "advertiser doesn't exist"
+    assert message == "Advertiser doesn't exist"
     assert application is None
 
 
@@ -57,7 +57,8 @@ def test_get_publisher_application(application_service):
 
     application_service.publisher_applications[publisher_id] = {advertiser_id: application_id}
 
-    applications = application_service.get_publisher_application(publisher_id)
+    applications = list(application_service.get_publisher_application(publisher_id))
+
 
     assert len(applications) == 1
     assert applications[0].publisher_id == publisher_id
