@@ -1,5 +1,4 @@
-from typing import Dict, List, Optional, Iterable
-from functools import wraps
+from typing import Dict, List, Optional
 
 from app.models import Advertiser
 

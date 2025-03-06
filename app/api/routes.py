@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, jsonify, request
 from app.api.serializers import (api_response, serialize_advertiser,
                                 serialize_order)
 from app.services import AdvertiserService, ApplicationService, OrderService

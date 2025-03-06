@@ -12,7 +12,6 @@ This API allows an affiliate partner to manage relationships between advertisers
   - [Orders](#orders)
 - [Data Models](#data-models)
 - [Tests](#tests)
-- [Scalability](#Scalability])
 
 ## Installation
 
@@ -279,6 +278,4 @@ Tests the GET /api_membership/orders endpoint to retrieve the list of orders for
 def test_get_orders(client):
     response = client.get('/api_membership/orders?publisher_id=test_publisher')
     assert response.status_code == 200
-````
-
-## Tests
+```

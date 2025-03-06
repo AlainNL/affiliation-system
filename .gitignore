@@ -1,3 +1,10 @@
 # Environments
 .env
 venv
+
+# Ignore all __pycache__ directories
+__pycache__/
+**/__pycache__/
+
+# Test coverage
+.coverage
