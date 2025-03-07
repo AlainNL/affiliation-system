@@ -84,7 +84,7 @@ The API is organized around three main resources:
 #### Retrieve the list of advertisers
 - **GET** `/api_membership/advertisers`
 
-   ```curl -X GET "http://localhost:5000/api_membership/advertisers```
+```curl -X GET "http://localhost:5000/api_membership/advertisers```
   
 - **Description**: Retrieves the list of advertisers available to a publisher.
 - **Optional Parameter**:
@@ -95,7 +95,7 @@ The API is organized around three main resources:
 - **GET** `/api_membership/advertisers/<advertiser_id>`
 📝 *Replace `<advertiser_id>` with the actual advertiser's ID. Example: `user_1`, `user_2`, `user_3`.*
 
- ```curl -X GET "http://localhost:5000/api_membership/advertisers/user_1```
+```curl -X GET "http://localhost:5000/api_membership/advertisers/user_1```
  
 - **Description**: Retrieves details of a specific advertiser.
 - **Parameter**:
@@ -107,10 +107,11 @@ The API is organized around three main resources:
 #### Apply to an advertiser
 - **POST** `/api_membership/applications`
   
-   ```curl -X POST "http://localhost:5000/api_membership/applications" \
+```
+curl -X POST "http://localhost:5000/api_membership/applications" \
      -H "Content-Type: application/json" \
      -d '{"publisher_id": "publisher_1", "advertiser_id": "user_1"}'
-  ```
+```
    
 - **Description**: Allows a publisher to apply to an advertiser.
 - **Required JSON Body**:
@@ -130,7 +131,9 @@ The API is organized around three main resources:
 - **Endpoint:** `/api_membership/orders?publisher_id=<publisher_id>`
 📝 *Replace `<publisher_id>` with the actual publisher's ID. Example: `publisher_1`, `publisher_2`.*
 
-  ```curl -X GET "http://localhost:5000/api_membership/orders?publisher_id=publisher_1&from_date=2025-02-26&to_date=2025-03-07"
+  ```
+  curl -X GET "http://localhost:5000/api_membership/orders?publisher_id=publisher_1&from_date=2025-02-26&to_date=2025-03-07"
+  
   ```
   
 - **Description:** Retrieves a publisher's orders with optional filters.
