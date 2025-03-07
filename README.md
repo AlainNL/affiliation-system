@@ -87,6 +87,8 @@ The API is organized around three main resources:
 - **Optional Parameter**:
   - `publisher_id` (query param) - Publisher's identifier.
 
+  ```curl -X GET "http://localhost:5000/api_membership/advertisers```
+
 #### Retrieve advertiser details
 - **GET** `/api_membership/advertisers/<advertiser_id>`
 📝 *Replace `<advertiser_id>` with the actual advertiser's ID. Example: `user_1`, `user_2`, `user_3`.*
@@ -94,6 +96,7 @@ The API is organized around three main resources:
 - **Parameter**:
   - `advertiser_id` (URL param) - Advertiser's identifier.
 
+  ```curl -X GET "http://localhost:5000/api_membership/advertisers/user_1```
 ---
 
 ### 2. Applications
@@ -115,6 +118,10 @@ The API is organized around three main resources:
 📝 *Replace `<publisher_id>` with the actual publisher's ID. Example: `publisher_1`, `publisher_2`.*
 - **Description:** Retrieves a publisher's orders with optional filters.
 
+  ```curl -X POST "http://localhost:5000/api_membership/applications" \
+     -H "Content-Type: application/json" \
+     -d '{"publisher_id": "publisher_1", "advertiser_id": "user_1"}'
+  ```
 **Required Parameters:**
 | Parameter      | Type   | Description               |
 |---------------|--------|---------------------------|
@@ -147,6 +154,19 @@ The API is organized around three main resources:
   }
 }
 
+``` curl -X POST "http://localhost:5000/api_membership/orders/track" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "advertiser_id": "user_2",
+           "publisher_id": "publisher_2",
+           "user_id": "2",
+           "amount": 49.99,
+           "tracking_params": {
+             "campaign": "flash_sale",
+             "source": "mobile_app"
+           }
+         }'
+```
 
 ```
 
