@@ -83,37 +83,45 @@ The API is organized around three main resources:
 ### 1. Advertisers
 #### Retrieve the list of advertisers
 - **GET** `/api_membership/advertisers`
+
+   ```curl -X GET "http://localhost:5000/api_membership/advertisers```
+  
 - **Description**: Retrieves the list of advertisers available to a publisher.
 - **Optional Parameter**:
   - `publisher_id` (query param) - Publisher's identifier.
-
-  ```curl -X GET "http://localhost:5000/api_membership/advertisers```
+    
 
 #### Retrieve advertiser details
 - **GET** `/api_membership/advertisers/<advertiser_id>`
 📝 *Replace `<advertiser_id>` with the actual advertiser's ID. Example: `user_1`, `user_2`, `user_3`.*
+
+ ```curl -X GET "http://localhost:5000/api_membership/advertisers/user_1```
+ 
 - **Description**: Retrieves details of a specific advertiser.
 - **Parameter**:
   - `advertiser_id` (URL param) - Advertiser's identifier.
 
-  ```curl -X GET "http://localhost:5000/api_membership/advertisers/user_1```
 ---
 
 ### 2. Applications
 #### Apply to an advertiser
 - **POST** `/api_membership/applications`
+  
+   ```curl -X POST "http://localhost:5000/api_membership/applications" \
+     -H "Content-Type: application/json" \
+     -d '{"publisher_id": "publisher_1", "advertiser_id": "user_1"}'
+  ```
+   
 - **Description**: Allows a publisher to apply to an advertiser.
 - **Required JSON Body**:
+  
   ```json
   {
     "publisher_id": "publisher_1",
     "advertiser_id": "user_1"
   }
 
-  ```curl -X POST "http://localhost:5000/api_membership/applications" \
-     -H "Content-Type: application/json" \
-     -d '{"publisher_id": "publisher_1", "advertiser_id": "user_1"}'
-  ```
+---
 
 ### 3. Orders
 
@@ -121,11 +129,12 @@ The API is organized around three main resources:
 - **Method:** `GET`
 - **Endpoint:** `/api_membership/orders?publisher_id=<publisher_id>`
 📝 *Replace `<publisher_id>` with the actual publisher's ID. Example: `publisher_1`, `publisher_2`.*
-- **Description:** Retrieves a publisher's orders with optional filters.
 
   ```curl -X GET "http://localhost:5000/api_membership/orders?publisher_id=publisher_1&from_date=2025-02-26&to_date=2025-03-07"
   ```
-
+  
+- **Description:** Retrieves a publisher's orders with optional filters.
+  
 
 **Required Parameters:**
 | Parameter      | Type   | Description               |
@@ -144,6 +153,21 @@ The API is organized around three main resources:
 #### Track an order
 - **Method:** `POST`
 - **Endpoint:** `/api_membership/orders/track`
+
+  ``` curl -X POST "http://localhost:5000/api_membership/orders/track" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "advertiser_id": "user_2",
+           "publisher_id": "publisher_2",
+           "user_id": "2",
+           "amount": 49.99,
+           "tracking_params": {
+             "campaign": "flash_sale",
+             "source": "mobile_app"
+           }
+         }'
+```
+
 - **Description:** Simulates an order and records the data.
 
 **Request Body (JSON):**
@@ -158,21 +182,6 @@ The API is organized around three main resources:
     "source": "mobile_app"
   }
 }
-
-``` curl -X POST "http://localhost:5000/api_membership/orders/track" \
-     -H "Content-Type: application/json" \
-     -d '{
-           "advertiser_id": "user_2",
-           "publisher_id": "publisher_2",
-           "user_id": "2",
-           "amount": 49.99,
-           "tracking_params": {
-             "campaign": "flash_sale",
-             "source": "mobile_app"
-           }
-         }'
-```
-
 ```
 
 ## Modèles de données
