@@ -110,6 +110,11 @@ The API is organized around three main resources:
     "advertiser_id": "user_1"
   }
 
+  ```curl -X POST "http://localhost:5000/api_membership/applications" \
+     -H "Content-Type: application/json" \
+     -d '{"publisher_id": "publisher_1", "advertiser_id": "user_1"}'
+  ```
+
 ### 3. Orders
 
 #### Retrieve orders
@@ -118,10 +123,10 @@ The API is organized around three main resources:
 📝 *Replace `<publisher_id>` with the actual publisher's ID. Example: `publisher_1`, `publisher_2`.*
 - **Description:** Retrieves a publisher's orders with optional filters.
 
-  ```curl -X POST "http://localhost:5000/api_membership/applications" \
-     -H "Content-Type: application/json" \
-     -d '{"publisher_id": "publisher_1", "advertiser_id": "user_1"}'
+  ```curl -X GET "http://localhost:5000/api_membership/orders?publisher_id=publisher_1&from_date=2025-02-26&to_date=2025-03-07"
   ```
+
+
 **Required Parameters:**
 | Parameter      | Type   | Description               |
 |---------------|--------|---------------------------|
