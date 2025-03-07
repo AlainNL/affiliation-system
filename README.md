@@ -157,7 +157,8 @@ curl -X POST "http://localhost:5000/api_membership/applications" \
 - **Method:** `POST`
 - **Endpoint:** `/api_membership/orders/track`
 
-  ``` curl -X POST "http://localhost:5000/api_membership/orders/track" \
+```
+curl -X POST "http://localhost:5000/api_membership/orders/track" \
      -H "Content-Type: application/json" \
      -d '{
            "advertiser_id": "user_2",
