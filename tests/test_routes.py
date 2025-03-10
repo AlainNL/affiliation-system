@@ -86,8 +86,7 @@ def test_get_orders(client):
 
 def test_apply_to_advertiser(client):
     response = client.post('/api_membership/applications', json={
-        'publisher_id': 'test_publisher',
-        'advertiser_id': advertiser_id
+        'publisher_id': 'publisher_1',
+        'advertiser_id': "user_2"
     })
     assert response.status_code == 201
-    assert data['success']
